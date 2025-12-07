@@ -1,0 +1,34 @@
+<resources>
+
+<!--Application-->
+    <string name="app_name">Nice Gallery</string>
+
+<!--Formats-->
+    <!--Weight-->
+    <string name="format_weight_bytes">%d байт</string>
+    <string name="format_weight_kilobytes">%.0f Кб</string>
+    <string name="format_weight_megabytes">%.0f Мб</string>
+    <string name="format_weight_gigabytes">%.1f Гб</string>
+    <string name="format_weight_terabytes">%.1f Тб</string>
+    <!--Size-->
+    <string name="format_size_2d">%dx%d</string>
+    <!--Date-->
+    <string name="format_java_simple_date_full_numeric">dd.MM.yyyy</string>
+    <!--Duration-->
+    <string name="format_duration_short">%d:%02d</string>
+    <string name="format_duration_full">%d:%02d:%02d</string>
+
+<!--Symbols-->
+    <string name="symbol_dot_separator">" • "</string>
+    <string name="symbol_play_video">▶</string>
+
+<!--Activities-->
+    <!--ActivityMain-->
+    <string name="activity_main_button_all">Все</string>
+    <string name="activity_main_button_folders">Папки</string>
+    <string name="activity_main_button_settings">Настройки</string>
+
+<!--Messages-->
+    <string name="message_no_items">Нет ни одного элемента</string>
+    <string name="message_update_in_progress">Обновление…</string>
+</resources>
