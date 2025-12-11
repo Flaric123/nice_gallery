@@ -11,8 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.nti.nice_gallery.R;
+import com.nti.nice_gallery.data.Domain;
 import com.nti.nice_gallery.data.IManagerOfFiles;
-import com.nti.nice_gallery.data.ManagerOfFiles_Test1;
 import com.nti.nice_gallery.views.ViewMediaGrid;
 import com.nti.nice_gallery.views.buttons.ButtonChoiceFilters;
 import com.nti.nice_gallery.views.buttons.ButtonChoiceGridVariant;
@@ -28,7 +28,7 @@ public class FragmentMediaAll extends Fragment {
         ButtonChoiceSortVariant buttonSortVariant = view.findViewById(R.id.buttonSortVariant);
         ButtonChoiceFilters buttonFilters = view.findViewById(R.id.buttonFilters);
 
-        IManagerOfFiles managerOfFiles = new ManagerOfFiles_Test1(getContext());
+        IManagerOfFiles managerOfFiles = Domain.getManagerOfFiles(getContext());
 
         viewMediaGrid.setItems(managerOfFiles.getAllFiles());
         buttonGridVariant.setVariantChangeListener(viewMediaGrid::setGridVariant);

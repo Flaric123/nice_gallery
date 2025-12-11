@@ -3,13 +3,9 @@ package com.nti.nice_gallery.utils;
 import android.content.Context;
 import android.util.Size;
 
-import androidx.annotation.Nullable;
-
 import com.nti.nice_gallery.R;
-import com.nti.nice_gallery.models.ModelMediaTreeItem;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 public class Convert {

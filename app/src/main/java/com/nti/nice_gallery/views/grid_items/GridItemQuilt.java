@@ -8,8 +8,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.nti.nice_gallery.R;
+import com.nti.nice_gallery.data.Domain;
 import com.nti.nice_gallery.data.IManagerOfFiles;
-import com.nti.nice_gallery.data.ManagerOfFiles_Test1;
 import com.nti.nice_gallery.models.ModelMediaTreeItem;
 import com.nti.nice_gallery.utils.Convert;
 
@@ -38,7 +38,7 @@ public class GridItemQuilt extends GridItemBase {
 
         infoView = findViewById(R.id.infoView);
         imageView = findViewById(R.id.imageView);
-        managerOfFiles = new ManagerOfFiles_Test1(getContext());
+        managerOfFiles = Domain.getManagerOfFiles(getContext());
         convert = new Convert(getContext());
     }
 
