@@ -187,9 +187,9 @@ public class ViewMediaGrid extends ScrollView {
 
             int itemWidth, itemHeight;
 
-            if (item.resolution != null) {
-                itemWidth = item.resolution.getWidth();
-                itemHeight = item.resolution.getHeight();
+            if (item.width != null && item.width > 0 && item.height != null && item.height > 0) {
+                itemWidth = item.width;
+                itemHeight = item.height;
             } else {
                 itemWidth = NO_SIZE_ITEM_RESOLUTION.getWidth();
                 itemHeight = NO_SIZE_ITEM_RESOLUTION.getHeight();
@@ -202,8 +202,6 @@ public class ViewMediaGrid extends ScrollView {
             float maxHeight = rowHeights.stream().max(Float::compareTo).get();
             float avgHeight = rowHeights.stream().reduce(0f, Float::sum) / rowHeights.size();
             boolean isItemLast = items.indexOf(item) == items.size() - 1;
-
-//            Log.d("QUILT_ALGORITHM", String.format("%s: %dx%d, %.2f, %.2f, %.2f", item.path, itemWidth, itemHeight, sumWidth, maxHeight, sumWidth / maxHeight));
 
             if ((sumWidth < MIN_IMAGES_ROW_WIDTH_PX || sumWidth / avgHeight < MIN_ROW_WIDTH_TO_HEIGHT_RATIO) && !isItemLast) {
                 continue;

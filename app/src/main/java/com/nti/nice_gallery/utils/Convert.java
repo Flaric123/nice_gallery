@@ -52,8 +52,8 @@ public class Convert {
         return String.format(context.getResources().getString(R.string.format_weight_terabytes), value);
     }
 
-    public String sizeToString(Size size) {
-        return String.format(context.getResources().getString(R.string.format_size_2d), size.getWidth(), size.getHeight());
+    public String sizeToString(int width, int height) {
+        return String.format(context.getResources().getString(R.string.format_size_2d), width, height);
     }
 
     public String dateToFullNumericDateString(Date date) {

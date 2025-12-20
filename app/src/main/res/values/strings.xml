@@ -17,6 +17,8 @@
     <!--Duration-->
     <string name="format_duration_short">%d:%02d</string>
     <string name="format_duration_full">%d:%02d:%02d</string>
+    <!--Names-->
+    <string name="format_name_storage_name">%s [%s]</string>
 
 <!--Symbols-->
     <string name="symbol_dot_separator">" • "</string>
@@ -38,4 +40,5 @@
     <string name="dialog_button_ok">ОК</string>
     <string name="dialog_button_yes">Да</string>
     <string name="dialog_button_no">Нет</string>
+
 </resources>

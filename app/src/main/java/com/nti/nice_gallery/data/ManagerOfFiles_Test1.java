@@ -25,10 +25,24 @@ import kotlin.jvm.functions.Function3;
 // Менеджер файлов для теста интерфейса
 public class ManagerOfFiles_Test1 implements IManagerOfFiles {
 
+    private static Bitmap placeholder_960x960;
+    private static Bitmap placeholder_1920x1080;
+    private static Bitmap placeholder_1080x1920;
+
     private final Context context;
 
     public ManagerOfFiles_Test1(Context context) {
         this.context = context;
+
+        if (placeholder_960x960 == null) {
+            placeholder_960x960 = ((BitmapDrawable)(ContextCompat.getDrawable(context, R.drawable.placeholder_960x960))).getBitmap();
+        }
+        if (placeholder_1920x1080 == null) {
+            placeholder_1920x1080 = ((BitmapDrawable)(ContextCompat.getDrawable(context, R.drawable.placeholder_1920x1080))).getBitmap();
+        }
+        if (placeholder_1080x1920 == null) {
+            placeholder_1080x1920 = ((BitmapDrawable)(ContextCompat.getDrawable(context, R.drawable.placeholder_1080x1920))).getBitmap();
+        }
     }
 
     // Возвращает спсиок случайно сгенерированных файлов
@@ -154,7 +168,26 @@ public class ManagerOfFiles_Test1 implements IManagerOfFiles {
             Size resolution = randomSize.invoke(type);
             Integer duration = randomDuration.invoke(type);
 
-            items.add(new ModelMediaFile((long)i, name, path, type, weight, createdAt, updatedAt, resolution, extension, duration));
+            int width = -1, height = -1, rotation = 0;
+
+            if (resolution != null) {
+                width = resolution.getWidth();
+                height = resolution.getHeight();
+            }
+
+            items.add(new ModelMediaFile(
+                    name,
+                    path,
+                    type,
+                    createdAt,
+                    updatedAt,
+                    weight,
+                    width,
+                    height,
+                    rotation,
+                    extension,
+                    duration
+            ));
         }
 
         return items;
@@ -162,12 +195,12 @@ public class ManagerOfFiles_Test1 implements IManagerOfFiles {
 
     @Override
     public Bitmap getFilePreview(ModelMediaFile item) {
-        if (item.resolution == null) {
-            return ((BitmapDrawable)(ContextCompat.getDrawable(context, R.drawable.placeholder_960x960))).getBitmap();
-        } else if (item.resolution.getWidth() == 1920) {
-            return ((BitmapDrawable)(ContextCompat.getDrawable(context, R.drawable.placeholder_1920x1080))).getBitmap();
+        if (item.width == null || item.width <= 0) {
+            return placeholder_960x960;
+        } else if (item.width == 1920) {
+            return placeholder_1920x1080;
         } else {
-            return ((BitmapDrawable)(ContextCompat.getDrawable(context, R.drawable.placeholder_1080x1920))).getBitmap();
+            return placeholder_1080x1920;
         }
     }
 
@@ -176,9 +209,9 @@ public class ManagerOfFiles_Test1 implements IManagerOfFiles {
     public List<ModelStorage> getAllStorages() {
         List<ModelStorage> list = new ArrayList<>();
 
-        list.add(new ModelStorage("Внутреннее хранилище"));
-        list.add(new ModelStorage("SD карта"));
-        list.add(new ModelStorage("USB накопитель"));
+        list.add(new ModelStorage("Внутреннее хранилище", "context://internal_storage", ModelStorage.Type.Primary));
+        list.add(new ModelStorage("SD карта", "context://SD-card/hk78cJG435", ModelStorage.Type.Removable));
+        list.add(new ModelStorage("USB накопитель", "context://USB/hgTd67Hm3", ModelStorage.Type.Removable));
 
         return list;
     }

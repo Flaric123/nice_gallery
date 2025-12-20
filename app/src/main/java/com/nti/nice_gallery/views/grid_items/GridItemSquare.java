@@ -83,7 +83,6 @@ public class GridItemSquare extends GridItemBase {
 
         if (model.type == ModelMediaFile.Type.Folder) {
             infoItems.add(model.name);
-            infoItems.add(convert.weightToString(model.weight));
         } else if (model.type == ModelMediaFile.Type.Image) {
             infoItems.add(model.extension.toUpperCase());
             infoItems.add(convert.weightToString(model.weight));
@@ -105,7 +104,6 @@ public class GridItemSquare extends GridItemBase {
         String infoString = String.join(getContext().getResources().getString(R.string.symbol_dot_separator), infoItems);
 
         imageView.setImageBitmap(managerOfFiles.getFilePreview(model));
-//        imageView.setImageURI(managerOfFiles.getItemContentUri(model));
         infoView.setText(infoString);
     }
 }

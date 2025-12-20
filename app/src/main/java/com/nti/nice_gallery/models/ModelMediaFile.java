@@ -1,7 +1,5 @@
 package com.nti.nice_gallery.models;
 
-import android.util.Size;
-
 import java.util.Date;
 
 public class ModelMediaFile {
@@ -20,39 +18,42 @@ public class ModelMediaFile {
     public @interface ForFilesOnly {}
     public @interface ForVideosOnly {}
 
-    public final Long mediaId;
     public final String name;
     public final String path;
     public final Type type;
-    public final Long weight;
     public final Date createdAt;
     public final Date updatedAt;
 
-    @ForFilesOnly public final Size resolution;
+    @ForFilesOnly public final Long weight;
+    @ForFilesOnly public final Integer width;
+    @ForFilesOnly public final Integer height;
+    @ForFilesOnly public final Integer rotation;
     @ForFilesOnly public final String extension;
 
     @ForVideosOnly public final Integer duration;
 
     public ModelMediaFile(
-            Long mediaId,
             String name,
             String path,
             Type type,
-            Long weight,
             Date createdAt,
             Date updatedAt,
-            @ForFilesOnly Size resolution,
+            @ForFilesOnly Long weight,
+            @ForFilesOnly Integer width,
+            @ForFilesOnly Integer height,
+            @ForFilesOnly Integer rotation,
             @ForFilesOnly String extension,
             @ForVideosOnly Integer duration
     ) {
-        this.mediaId = mediaId;
         this.name = name;
         this.path = path;
         this.type = type;
-        this.weight = weight;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.resolution = resolution;
+        this.weight = weight;
+        this.width = width;
+        this.height = height;
+        this.rotation = rotation;
         this.extension = extension;
         this.duration = duration;
     }

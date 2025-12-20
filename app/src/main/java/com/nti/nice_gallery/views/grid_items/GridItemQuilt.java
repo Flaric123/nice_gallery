@@ -31,7 +31,7 @@ public class GridItemQuilt extends GridItemBase {
     }
 
     private void init(float weight) {
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT);
         layoutParams.weight = weight;
         setLayoutParams(layoutParams);
         inflate(getContext(), R.layout.grid_item_quilt, this);
@@ -56,7 +56,6 @@ public class GridItemQuilt extends GridItemBase {
 
         if (model.type == ModelMediaFile.Type.Folder) {
             infoItems.add(model.name);
-            infoItems.add(convert.weightToString(model.weight));
         } else if (model.type == ModelMediaFile.Type.Image) {
             infoItems.add(model.extension.toUpperCase());
             infoItems.add(convert.weightToString(model.weight));
@@ -69,7 +68,6 @@ public class GridItemQuilt extends GridItemBase {
         String infoString = String.join(getContext().getResources().getString(R.string.symbol_dot_separator), infoItems);
 
         imageView.setImageBitmap(managerOfFiles.getFilePreview(model));
-//        imageView.setImageURI(managerOfFiles.getItemContentUri(model));
         infoView.setText(infoString);
     }
 }

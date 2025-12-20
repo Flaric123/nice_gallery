@@ -70,11 +70,14 @@ public class GridItemLine extends GridItemBase {
     private void updateView() {
         ArrayList<String> infoItems = new ArrayList<>();
 
-        infoItems.add(convert.weightToString(model.weight));
+        if (model.type != ModelMediaFile.Type.Folder) {
+            infoItems.add(convert.weightToString(model.weight));
+        }
+
         infoItems.add(convert.dateToFullNumericDateString(model.createdAt));
 
-        if (model.resolution != null) {
-            infoItems.add(convert.sizeToString(model.resolution));
+        if (model.width != null && model.width > 0 && model.height != null && model.height > 0) {
+            infoItems.add(convert.sizeToString(model.width, model.height));
         }
 
         String info = String.join(getContext().getResources().getString(R.string.symbol_dot_separator), infoItems);
@@ -90,7 +93,6 @@ public class GridItemLine extends GridItemBase {
         }
 
         imageView.setImageBitmap(managerOfFiles.getFilePreview(model));
-//        imageView.setImageURI(managerOfFiles.getItemContentUri(model));
         nameView.setText(model.name);
         pathView.setText(model.path);
         infoView.setText(info);
