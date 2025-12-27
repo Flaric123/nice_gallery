@@ -2,8 +2,10 @@ package com.nti.nice_gallery.models;
 
 import androidx.annotation.NonNull;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.stream.Stream;
 
 public class ReadOnlyList<T> implements Iterable<T> {
 
@@ -12,6 +14,12 @@ public class ReadOnlyList<T> implements Iterable<T> {
     public ReadOnlyList(Collection<T> source) {
         if (source != null) {
             list.addAll(source);
+        }
+    }
+
+    public ReadOnlyList(T[] source) {
+        if (source != null) {
+            list.addAll(Arrays.asList(source));
         }
     }
 
@@ -29,6 +37,10 @@ public class ReadOnlyList<T> implements Iterable<T> {
 
     public boolean isEmpty() {
         return list.isEmpty();
+    }
+
+    public Stream<T> stream() {
+        return list.stream();
     }
 
     @NonNull
