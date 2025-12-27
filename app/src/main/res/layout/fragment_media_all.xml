@@ -6,6 +6,7 @@
     android:orientation="vertical">
 
     <com.nti.nice_gallery.views.ViewActionBar
+        android:id="@+id/viewActionBar"
         style="@style/Custom_ActionBar">
         <com.nti.nice_gallery.views.buttons.ButtonChoiceGridVariant
             android:id="@+id/buttonGridVariant"

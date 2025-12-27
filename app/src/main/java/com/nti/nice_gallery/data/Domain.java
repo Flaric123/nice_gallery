@@ -4,8 +4,6 @@ import android.content.Context;
 
 public class Domain {
 
-    public static final boolean showScanReportBeforeScanning = false;
-
     public static IManagerOfFiles getManagerOfFiles(Context context) {
         return new ManagerOfFiles(context);
 //        return new ManagerOfFiles_Test1(context);

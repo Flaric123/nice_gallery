@@ -15,6 +15,7 @@ import com.nti.nice_gallery.data.Domain;
 import com.nti.nice_gallery.data.IManagerOfFiles;
 import com.nti.nice_gallery.models.ModelGetFilesRequest;
 import com.nti.nice_gallery.models.ModelGetFilesResponse;
+import com.nti.nice_gallery.views.ViewActionBar;
 import com.nti.nice_gallery.views.ViewMediaGrid;
 import com.nti.nice_gallery.views.buttons.ButtonChoiceFilters;
 import com.nti.nice_gallery.views.buttons.ButtonChoiceGridVariant;
@@ -31,6 +32,7 @@ public class FragmentMediaAll extends Fragment {
         View view = inflater.inflate(R.layout.fragment_media_all, container, false);
 
         ViewMediaGrid viewMediaGrid = view.findViewById(R.id.viewMediaGrid);
+        ViewActionBar viewActionBar = view.findViewById(R.id.viewActionBar);
         ButtonChoiceGridVariant buttonGridVariant = view.findViewById(R.id.buttonGridVariant);
         ButtonChoiceSortVariant buttonSortVariant = view.findViewById(R.id.buttonSortVariant);
         ButtonChoiceFilters buttonFilters = view.findViewById(R.id.buttonFilters);
@@ -57,7 +59,8 @@ public class FragmentMediaAll extends Fragment {
             });
         };
 
-        buttonGridVariant.setVariantChangeListener(viewMediaGrid::setGridVariant);
+        viewMediaGrid.setStateChangeListener(v -> viewActionBar.setIsEnabled(v.getState() == ViewMediaGrid.State.StandbyMode));
+        buttonGridVariant.setVariantChangeListener(btn -> viewMediaGrid.setGridVariant(btn.getSelectedVariant()));
         buttonRefresh.setRefreshListener(loadFiles);
 
         loadFiles.run();

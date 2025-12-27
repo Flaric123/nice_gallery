@@ -23,6 +23,7 @@ import com.nti.nice_gallery.views.grid_items.GridItemSquare;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import kotlin.jvm.functions.Function1;
@@ -43,6 +44,7 @@ public class ViewMediaGrid extends ScrollView {
     private GridVariant gridVariant;
     private int renderedItemsCount = 0;
     private State state = State.StandbyMode;
+    private Consumer<ViewMediaGrid> stateChangeListener;
 
     private IManagerOfSettings managerOfSettings;
 
@@ -118,6 +120,13 @@ public class ViewMediaGrid extends ScrollView {
         return state;
     }
 
+    private void setState(State state) {
+        this.state = state;
+        if (stateChangeListener != null) {
+            stateChangeListener.accept(this);
+        }
+    }
+
     public boolean trySetStateScanningInProgress(boolean isScanningInProgress) {
         if (state == State.FilesLoading) {
             return false;
@@ -125,17 +134,21 @@ public class ViewMediaGrid extends ScrollView {
 
         if (isScanningInProgress) {
             if (state != State.ScanningInProgress) {
-                state = State.ScanningInProgress;
+                setState(State.ScanningInProgress);
                 updateGrid();
             }
         } else {
             if (state != State.StandbyMode) {
-                state = State.StandbyMode;
+                setState(State.StandbyMode);
                 updateGrid();
             }
         }
 
         return true;
+    }
+
+    public void setStateChangeListener(Consumer<ViewMediaGrid> listener) {
+        stateChangeListener = listener;
     }
 
     private void updateGrid() {
@@ -174,7 +187,7 @@ public class ViewMediaGrid extends ScrollView {
             return;
         }
 
-        state = State.FilesLoading;
+        setState(State.FilesLoading);
         container.addView(viewInfoFilesLoading);
 
         Supplier<LinearLayout> renderNextForListVariant = () -> {
@@ -358,7 +371,7 @@ public class ViewMediaGrid extends ScrollView {
                 post(() -> {
                     container.removeView(viewInfoFilesLoading);
                     container.addView(pageContainerFinal);
-                    this.state = State.StandbyMode;
+                    setState(State.StandbyMode);
                     checkIsContainerFullAndLoadNextIfNot.run();
                     executor.shutdown();
                 });

@@ -23,7 +23,7 @@ public class ButtonChoiceGridVariant extends ButtonBase {
     });
 
     private int selectedVariantIndex;
-    private Consumer<ViewMediaGrid.GridVariant> variantChangeListener;
+    private Consumer<ButtonChoiceGridVariant> variantChangeListener;
     private IManagerOfSettings managerOfSettings;
 
     public ButtonChoiceGridVariant(Context context) {
@@ -50,7 +50,11 @@ public class ButtonChoiceGridVariant extends ButtonBase {
         setOnClickListener(v -> onClick());
     }
 
-    public void setVariantChangeListener(Consumer<ViewMediaGrid.GridVariant> l) {
+    public ViewMediaGrid.GridVariant getSelectedVariant() {
+        return variants.get(selectedVariantIndex).variant;
+    }
+
+    public void setVariantChangeListener(Consumer<ButtonChoiceGridVariant> l) {
         variantChangeListener = l;
     }
 
@@ -64,7 +68,7 @@ public class ButtonChoiceGridVariant extends ButtonBase {
         setImageResource(variants.get(selectedVariantIndex).iconResourceId);
 
         if (variantChangeListener != null) {
-            variantChangeListener.accept(variants.get(selectedVariantIndex).variant);
+            variantChangeListener.accept(this);
         }
     }
 
