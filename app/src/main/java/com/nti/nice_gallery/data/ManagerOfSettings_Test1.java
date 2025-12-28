@@ -33,7 +33,7 @@ public class ManagerOfSettings_Test1 implements IManagerOfSettings{
 
     @Override
     public ViewMediaGrid.GridVariant getGridVariant() {
-        return ViewMediaGrid.GridVariant.ThreeColumns;
+        return ViewMediaGrid.GridVariant.List;
     }
 
     @Override

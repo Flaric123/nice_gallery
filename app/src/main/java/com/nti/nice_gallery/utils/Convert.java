@@ -6,6 +6,8 @@ import android.util.Size;
 import com.nti.nice_gallery.R;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class Convert {
@@ -56,9 +58,10 @@ public class Convert {
         return String.format(context.getResources().getString(R.string.format_size_2d), width, height);
     }
 
-    public String dateToFullNumericDateString(Date date) {
+    public String dateToFullNumericDateString(LocalDateTime date) {
         if (date == null) return null;
-        return new SimpleDateFormat(context.getResources().getString(R.string.format_java_simple_date_full_numeric)).format(date);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(context.getString(R.string.format_java_simple_date_full_numeric));
+        return date.format(formatter);
     }
 
     public String durationToTimeString(Integer duration) {

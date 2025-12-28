@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.media.ExifInterface;
 import android.media.MediaMetadataRetriever;
 import android.os.storage.StorageManager;
@@ -12,10 +11,9 @@ import android.os.storage.StorageVolume;
 import android.util.Log;
 import android.util.Size;
 
-import androidx.core.content.ContextCompat;
-
 import com.nti.nice_gallery.R;
 import com.nti.nice_gallery.models.ModelFileFormat;
+import com.nti.nice_gallery.models.ModelFilters;
 import com.nti.nice_gallery.models.ModelGetFilesRequest;
 import com.nti.nice_gallery.models.ModelGetFilesResponse;
 import com.nti.nice_gallery.models.ModelMediaFile;
@@ -23,13 +21,12 @@ import com.nti.nice_gallery.models.ModelStorage;
 import com.nti.nice_gallery.models.ReadOnlyList;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import kotlin.jvm.functions.Function1;
@@ -53,7 +50,7 @@ public class ManagerOfFiles implements IManagerOfFiles {
 
             try {
                 File storageFolder = new File(storage.path);
-                recursionScanning(storageFolder, files);
+                recursionScanning(storageFolder, files, request.filters);
             } catch (Exception e) {
                 Log.e(LOG_TAG, e.getMessage());
             }
@@ -82,10 +79,12 @@ public class ManagerOfFiles implements IManagerOfFiles {
             }
         }
 
+        final List<ModelMediaFile> sortedFiles = sortFiles(files, request.sortVariant, request.foldersFirst);
+
         return new ModelGetFilesResponse(
                 startedAt,
                 LocalDateTime.now(),
-                new ReadOnlyList<>(files),
+                new ReadOnlyList<>(sortedFiles),
                 new ReadOnlyList<>(storages),
                 new ReadOnlyList<>(filesWithErrors),
                 new ReadOnlyList<>(storagesWithErrors)
@@ -125,11 +124,16 @@ public class ManagerOfFiles implements IManagerOfFiles {
         };
 
         Function1<ModelMediaFile, Bitmap> getImagePreview = _item -> {
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = calcInSampleSize.invoke(_item);
-            options.inPreferredConfig = android.graphics.Bitmap.Config.RGB_565;
-            Bitmap result = BitmapFactory.decodeFile(item.path, options);
-            return rotateBitmap.invoke(result, _item.rotation);
+            try {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inSampleSize = calcInSampleSize.invoke(_item);
+                options.inPreferredConfig = android.graphics.Bitmap.Config.RGB_565;
+                Bitmap result = BitmapFactory.decodeFile(item.path, options);
+                return rotateBitmap.invoke(result, _item.rotation);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, e.getMessage());
+                return null;
+            }
         };
 
         Function1<ModelMediaFile, Bitmap> getVideoPreview = _item -> {
@@ -206,22 +210,19 @@ public class ManagerOfFiles implements IManagerOfFiles {
         return storages;
     }
 
-    private void recursionScanning(File folder, List<ModelMediaFile> files) {
-        File[] folderFiles = folder.listFiles(file -> !file.isHidden() && !file.getName().startsWith("."));
+    private void recursionScanning(File folder, List<ModelMediaFile> files, ModelFilters filters) {
+        File[] folderFiles = folder.listFiles();
 
         if (folderFiles == null || folderFiles.length == 0) {
             return;
         }
 
         for (File file : folderFiles) {
-            if (file.isDirectory()) {
-                recursionScanning(file, files);
-                continue;
-            }
-
-            ModelMediaFile item = getFileInfo(file);
-            if (item != null) {
-                files.add(item);
+            ModelMediaFile model = getFileInfo(file);
+            if (file.isDirectory() && foldersFilter(filters, file, model)) {
+                recursionScanning(file, files, filters);
+            } else if (filesFilter(filters, file, model)) {
+                files.add(model);
             }
         }
     }
@@ -241,10 +242,17 @@ public class ManagerOfFiles implements IManagerOfFiles {
             public int duration;
         }
 
-        Function1<File, Date> getFileCreationTime = _file -> {
+        Function1<File, LocalDateTime> getFileCreationTime = _file -> {
             try {
-                BasicFileAttributes attrs = Files.readAttributes(_file.toPath(), BasicFileAttributes.class);
-                return new Date(attrs.creationTime().toMillis());
+                ExifInterface exif = new ExifInterface(_file.getAbsolutePath());
+                String dateString = exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL);
+
+                if (dateString == null) {
+                    return LocalDateTime.ofInstant(Instant.ofEpochMilli(_file.lastModified()), ZoneId.systemDefault());
+                }
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss");
+                return LocalDateTime.parse(dateString, formatter);
             } catch (IOException e) {
                 Log.e(LOG_TAG, e.getMessage());
                 return null;
@@ -372,8 +380,8 @@ public class ManagerOfFiles implements IManagerOfFiles {
         String name = null;
         String path = null;
         ModelMediaFile.Type type = null;
-        Date createAt = null;
-        Date updateAt = null;
+        LocalDateTime createAt = null;
+        LocalDateTime updateAt = null;
         Long weight = null;
         Integer width = null;
         Integer height = null;
@@ -391,7 +399,7 @@ public class ManagerOfFiles implements IManagerOfFiles {
 
             path = file.getAbsolutePath();
             createAt = getFileCreationTime.invoke(file);
-            updateAt = new Date(file.lastModified());
+            updateAt = Instant.ofEpochMilli(file.lastModified()).atZone(ZoneId.systemDefault()).toLocalDateTime();
 
             if (type != ModelMediaFile.Type.Folder) {
                 weight = file.length();
@@ -431,5 +439,123 @@ public class ManagerOfFiles implements IManagerOfFiles {
                 duration,
                 error
         );
+    }
+
+    private boolean foldersFilter(ModelFilters filters, File folder, ModelMediaFile model) {
+        if (model == null) {
+            return false;
+        }
+        if (filters == null) {
+            return true;
+        }
+
+        if (filters.ignoreHidden && folder.isHidden()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean filesFilter(ModelFilters filters, File file, ModelMediaFile model) {
+        if (model == null) {
+            return false;
+        }
+        if (filters == null) {
+            return true;
+        }
+
+        if (filters.ignoreHidden && file.isHidden()) {
+            return false;
+        }
+        if (filters.types != null && !filters.types.isEmpty() && (model.type == null || !filters.types.contains(model.type))) {
+            return false;
+        }
+        if (filters.minWeight != null && (model.weight == null || filters.minWeight > model.weight)) {
+            return false;
+        }
+        if (filters.maxWeight != null && (model.weight == null || filters.maxWeight < model.weight)) {
+            return false;
+        }
+        if (filters.minCreateAt != null && (model.createdAt == null || model.createdAt.isBefore(filters.minCreateAt))) {
+            return false;
+        }
+        if (filters.maxCreateAt != null && (model.createdAt == null || model.createdAt.isAfter(filters.maxCreateAt))) {
+            return false;
+        }
+        if (filters.minUpdateAt != null && (model.updatedAt == null || model.updatedAt.isBefore(filters.minUpdateAt))) {
+            return false;
+        }
+        if (filters.maxUpdateAt != null && (model.updatedAt == null || model.updatedAt.isAfter(filters.maxUpdateAt))) {
+            return false;
+        }
+        if (filters.extensions != null && !filters.extensions.isEmpty() && (model.extension == null || !filters.extensions.contains(model.extension.toLowerCase()))) {
+            return false;
+        }
+        if (filters.minDuration != null && (model.duration == null || filters.minDuration > model.duration)) {
+            return false;
+        }
+        if (filters.maxDuration != null && (model.duration == null || filters.maxDuration < model.duration)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private List<ModelMediaFile> sortFiles(List<ModelMediaFile> files, ModelGetFilesRequest.SortVariant sortVariant, boolean foldersFirst) {
+
+        Function2<Comparable, Comparable, Integer> safetyCompare = (p1, p2) -> {
+            if (p1 == null && p2 == null) {
+                return 0;
+            }
+            if (p1 == null) {
+                return 1;
+            }
+            if (p2 == null) {
+                return -1;
+            }
+            return p1.compareTo(p2);
+        };
+
+        Function1<List<ModelMediaFile>, List<ModelMediaFile>> sort = _files -> {
+            if (sortVariant == null) {
+                return _files;
+            }
+
+            switch (sortVariant) {
+                case ByName: _files.sort((f1, f2) -> safetyCompare.invoke(f1.name, f2.name)); break;
+                case ByNameDesc: _files.sort((f1, f2) -> -safetyCompare.invoke(f1.name, f2.name)); break;
+                case ByCreateAt: _files.sort((f1, f2) -> safetyCompare.invoke(f1.createdAt, f2.createdAt)); break;
+                case ByCreateAtDesc: _files.sort((f1, f2) -> -safetyCompare.invoke(f1.createdAt, f2.createdAt)); break;
+                case ByUpdateAt: _files.sort((f1, f2) -> safetyCompare.invoke(f1.updatedAt, f2.updatedAt)); break;
+                case ByUpdateAtDesc: _files.sort((f1, f2) -> -safetyCompare.invoke(f1.updatedAt, f2.updatedAt)); break;
+                case ByWeight: _files.sort((f1, f2) -> safetyCompare.invoke(f1.weight, f2.weight)); break;
+                case ByWeightDesc: _files.sort((f1, f2) -> -safetyCompare.invoke(f1.weight, f2.weight)); break;
+            }
+
+            return _files;
+        };
+
+        List<ModelMediaFile> foldersOnly = new ArrayList<>();
+        List<ModelMediaFile> filesOnly = new ArrayList<>();
+
+        for (ModelMediaFile item : files) {
+            List<ModelMediaFile> list = item.type == ModelMediaFile.Type.Folder ? foldersOnly : filesOnly;
+            list.add(item);
+        }
+
+        foldersOnly = sort.invoke(foldersOnly);
+        filesOnly = sort.invoke(filesOnly);
+
+        List<ModelMediaFile> result = new ArrayList<>();
+
+        if (foldersFirst) {
+            result.addAll(foldersOnly);
+            result.addAll(filesOnly);
+        } else {
+            result.addAll(filesOnly);
+            result.addAll(foldersOnly);
+        }
+
+        return result;
     }
 }

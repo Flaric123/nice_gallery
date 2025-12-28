@@ -31,6 +31,10 @@ public class ReadOnlyList<T> implements Iterable<T> {
         return list.indexOf(item);
     }
 
+    public boolean contains(T item) {
+        return list.contains(item);
+    }
+
     public int size() {
         return list.size();
     }

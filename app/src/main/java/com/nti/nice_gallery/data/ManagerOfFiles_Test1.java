@@ -69,12 +69,9 @@ public class ManagerOfFiles_Test1 implements IManagerOfFiles {
         List<ModelMediaFile> items = new ArrayList<>();
         Random random = new Random(RANDOM_SEED);
 
-        Supplier<Date> randomDate = () -> {
-            Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.DAY_OF_YEAR, -random.nextInt(MAX_NUMBER_OF_DAYS_AGO));
-            cal.add(Calendar.HOUR_OF_DAY, -random.nextInt(24));
-            cal.add(Calendar.MINUTE, -random.nextInt(60));
-            return cal.getTime();
+        Supplier<LocalDateTime> randomDate = () -> {
+            int randomInt = random.nextInt(MAX_NUMBER_OF_DAYS_AGO);
+            return LocalDateTime.now().minusDays(randomInt);
         };
 
         Supplier<ModelMediaFile.Type> randomType = () -> {
@@ -167,8 +164,8 @@ public class ManagerOfFiles_Test1 implements IManagerOfFiles {
             String name = randomName.invoke(type, i, extension);
             String path = randomPath.invoke(name);
             Long weight = randomWeight.invoke(type);
-            Date createdAt = randomDate.get();
-            Date updatedAt = randomDate.get();
+            LocalDateTime createdAt = randomDate.get();
+            LocalDateTime updatedAt = randomDate.get();
             Size resolution = randomSize.invoke(type);
             Integer duration = randomDuration.invoke(type);
 

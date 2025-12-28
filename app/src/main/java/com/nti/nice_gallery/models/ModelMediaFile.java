@@ -2,6 +2,7 @@ package com.nti.nice_gallery.models;
 
 import androidx.annotation.Nullable;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class ModelMediaFile {
@@ -23,8 +24,8 @@ public class ModelMediaFile {
     public final String name;
     public final String path;
     public final Type type;
-    public final Date createdAt;
-    public final Date updatedAt;
+    public final LocalDateTime createdAt;
+    public final LocalDateTime updatedAt;
 
     @ForFilesOnly public final Long weight;
     @ForFilesOnly public final Integer width;
@@ -40,8 +41,8 @@ public class ModelMediaFile {
             String name,
             String path,
             Type type,
-            Date createdAt,
-            Date updatedAt,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
             @ForFilesOnly Long weight,
             @ForFilesOnly Integer width,
             @ForFilesOnly Integer height,
